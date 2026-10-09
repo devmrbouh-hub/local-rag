@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+data/chroma/
+data/bm25/
+data/cache/
+# исходник ~1 МБ — можно пересобрать скриптом; в git не тащим
+data/source/tk_rf_extracted.txt
+data/source/tk_rf.pdf
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.DS_Store
+Thumbs.db
+
+# Локально для агента / отладки API, не в публичный репозиторий
+ПЛАН.md
+.cursor/
+ask.json
