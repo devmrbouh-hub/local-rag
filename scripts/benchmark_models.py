@@ -15,6 +15,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+# Консоль Windows по умолчанию в cp1251, а в выводе есть «≈». Без этого print падает
+# с UnicodeEncodeError ещё до того, как замер успеет напечататься.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from app.config import LLM_MODEL, OLLAMA_HOST  # noqa: E402
 
 PROMPT = "Кратко: что регулирует Трудовой кодекс РФ? Ответ в 3 предложениях."

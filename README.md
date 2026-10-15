@@ -27,7 +27,32 @@ HTTP: `POST /ingest`, `POST /ask`, `GET /health`. Промпт запрещае�
 
 Docker не используем.
 
-## Три команды запуска
+## Запуск
+
+Порта два, и это разные сервисы. **11434** — Ollama, там живут модели. **8000** — FastAPI, там `/ask` и `/health`. Команда `uvicorn ... --port 8000` поднимает API, а не Ollama.
+
+Сначала Ollama. Десктопное приложение достаточно открыть (иконка в трее), либо в отдельном окне:
+
+```powershell
+ollama serve
+```
+
+Окно не закрывать. Хост и порт Ollama берутся из `OLLAMA_HOST`, по умолчанию `http://127.0.0.1:11434` (см. `.env.example`). Проверка, что сервер отвечает:
+
+```powershell
+curl.exe -s http://127.0.0.1:11434/api/tags
+```
+
+Модели скачиваются один раз:
+
+```powershell
+ollama pull nomic-embed-text
+ollama pull llama3.2:3b-instruct-q4_K_M
+```
+
+Ollama нужна уже на этапе индексации: эмбеддинги считаются через неё, без сервера `ingest_cli` упадёт с сообщением «Не удалось подключиться к Ollama».
+
+Дальше установка:
 
 ```powershell
 git clone https://github.com/devmrbouh-hub/local-rag.git
@@ -47,6 +72,8 @@ python -m app.ingest_cli
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
+Что поднялось и видна ли Ollama, показывает `GET /health`: поля `ollama_version`, `llm_available`, `embed_available`.
+
 ## Запрос
 
 `POST /ask` по умолчанию берёт 10 фрагментов (`ASK_DEFAULT_TOP_K`). В CLI поиска без модели по-прежнему 5 (`DEFAULT_TOP_K`). Короткий вопрос часто не совпадает со словами статьи, поэтому у API запас шире. Для более короткого ответа передайте `"top_k": 3` или `5`.
@@ -62,6 +89,8 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 В промпт модели попадают **5** лучших фрагментов после RRF (`ASK_PROMPT_CHUNKS`, по умолчанию 5), в JSON `sources` — до **3** (`ASK_SOURCES_MAX`). Поиск для `/ask` по умолчанию `top_k=10`.
 
 ### PowerShell (Windows)
+
+Подняты должны быть оба процесса: Ollama на 11434 (раздел «Запуск») и API на 8000.
 
 Сервер: `uvicorn app.main:app --host 127.0.0.1 --port 8000` (окно не закрывать).
 
